@@ -171,3 +171,105 @@ func (e *errorReader) Read(p []byte) (int, error) {
 type testError struct{ s string }
 
 func (e *testError) Error() string { return e.s }
+
+func TestParseEnvWithPrefix(t *testing.T) {
+    resetFlags()
+    var oldUser, oldUrl, oldListen, oldCount, oldVerbose, oldRatio = *user, *url, *listen, *count, *verbose, *ratio
+    defer func() { *user = oldUser; *url = oldUrl; *listen = oldListen; *count = oldCount; *verbose = oldVerbose; *ratio = oldRatio }()
+    t.Setenv("APP_USER", "envuser")
+    t.Setenv("APP_URL", "http://env:9000")
+    t.Setenv("APP_LISTEN", ":8888")
+    t.Setenv("APP_COUNT", "99")
+    t.Setenv("APP_VERBOSE", "true")
+    t.Setenv("APP_RATIO", "1.5")
+    if err := ParseEnv("APP_"); err != nil {
+        t.Fatalf("ParseEnv: %v", err)
+    }
+    if *user != "envuser" {
+        t.Fatalf("expected user from env, got %q", *user)
+    }
+    if *url != "http://env:9000" {
+        t.Fatalf("expected url from env, got %q", *url)
+    }
+    if *listen != ":8888" {
+        t.Fatalf("expected listen from env, got %q", *listen)
+    }
+    if *count != 99 {
+        t.Fatalf("expected count=99 from env, got %d", *count)
+    }
+    if *verbose != true {
+        t.Fatalf("expected verbose=true from env, got %v", *verbose)
+    }
+    if *ratio != 1.5 {
+        t.Fatalf("expected ratio=1.5 from env, got %v", *ratio)
+    }
+}
+
+func TestParseEnvPrecedence(t *testing.T) {
+    resetFlags()
+    var oldListen = *listen
+    defer func() { *listen = oldListen }()
+    flag.Set("listen", ":7777")
+    t.Setenv("APP_LISTEN", ":8888")
+    if err := ParseEnv("APP_"); err != nil {
+        t.Fatalf("ParseEnv: %v", err)
+    }
+    if *listen != ":7777" {
+        t.Fatalf("expected command-line listen to win over env, got %q", *listen)
+    }
+}
+
+func TestParseEnvErrors(t *testing.T) {
+    resetFlags()
+    var oldUser = *user
+    defer func() { *user = oldUser }()
+    t.Setenv("APP_FOO", "bar")
+    if err := ParseEnv("APP_"); err == nil {
+        t.Fatalf("expected error for unknown option with prefix")
+    }
+}
+
+func TestParseEnvInvalidValue(t *testing.T) {
+    resetFlags()
+    var oldCount = *count
+    defer func() { *count = oldCount }()
+    t.Setenv("APP_COUNT", "notanint")
+    if err := ParseEnv("APP_"); err == nil {
+        t.Fatalf("expected error for invalid value")
+    }
+}
+
+func TestParseEnvNoPrefix(t *testing.T) {
+    resetFlags()
+    var oldUser, oldUrl = *user, *url
+    defer func() { *user = oldUser; *url = oldUrl }()
+    t.Setenv("USER", "envuser")
+    t.Setenv("URL", "http://env:9000")
+    t.Setenv("SOME_RANDOM_VAR", "should-be-ignored")
+    if err := ParseEnv(""); err != nil {
+        t.Fatalf("ParseEnv: %v", err)
+    }
+    if *user != "envuser" {
+        t.Fatalf("expected user from env, got %q", *user)
+    }
+    if *url != "http://env:9000" {
+        t.Fatalf("expected url from env, got %q", *url)
+    }
+    if *listen != ":8080" {
+        t.Fatalf("expected default listen value, got %q", *listen)
+    }
+}
+
+func TestParseEnvPrefixSkipsUnrelated(t *testing.T) {
+    resetFlags()
+    var oldUser = *user
+    defer func() { *user = oldUser }()
+    t.Setenv("OTHER_USER", "other")
+    t.Setenv("APP_USER", "envuser")
+    if err := ParseEnv("APP_"); err != nil {
+        t.Fatalf("ParseEnv: %v", err)
+    }
+    if *user != "envuser" {
+        t.Fatalf("expected user from APP_USER, got %q", *user)
+    }
+}

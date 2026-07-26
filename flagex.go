@@ -61,3 +61,43 @@ func ParseURL(url string) error {
     if err != nil { return err }
     return parseConfig(url, string(data))
 }
+
+// ParseEnv reads environment variables and sets matching flags in the
+// standard flag package. Environment variable names are mapped to flag
+// names by stripping prefix and converting to lowercase. For example,
+// with prefix "APP_", APP_URL sets the "url" flag.
+//
+// When prefix is non-empty, only variables starting with the prefix are
+// processed and any that do not match a defined flag cause an error.
+// When prefix is empty, all variables are considered and those that do
+// not match a defined flag are silently skipped.
+// Flags already set via the command line take precedence.
+func ParseEnv(prefix string) error {
+    var set = make(map[string]bool)
+    flag.Visit(func(f *flag.Flag) { set[f.Name] = true })
+    for _, kv := range os.Environ() {
+        var name, value, found = strings.Cut(kv, "=")
+        if !found { continue }
+        name = strings.TrimSpace(name)
+        value = strings.TrimSpace(value)
+        var flagName string
+        if prefix == "" {
+            flagName = strings.ToLower(name)
+        } else {
+            if !strings.HasPrefix(name, prefix) { continue }
+            flagName = strings.ToLower(strings.TrimPrefix(name, prefix))
+            if flagName == "" { continue }
+        }
+        if flag.Lookup(flagName) == nil {
+            if prefix != "" {
+                return fmt.Errorf("env %s: unknown option %q", name, flagName)
+            }
+            continue
+        }
+        if set[flagName] { continue }
+        if err := flag.Set(flagName, value); err != nil {
+            return fmt.Errorf("env %s: %v", name, err)
+        }
+    }
+    return nil
+}
