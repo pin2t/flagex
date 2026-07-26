@@ -29,3 +29,4 @@ Each line is `name=value`. Blank lines and lines starting with `#` are ignored. 
 - **ParseFile(path)** — reads configuration from a file.
 - **ParseStream(r)** — reads configuration from an `io.Reader`.
 - **ParseURL(url)** — fetches configuration via HTTP GET.
+- **ParseEnv(prefix)** — fetches configuration from system environment variables.
