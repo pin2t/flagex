@@ -1,3 +1,9 @@
+// Package flagex extends the standard flag package with functions to parse
+// command-line flags from configuration files, streams, and URLs.
+//
+// Each line in the configuration should be in name=value format. Blank lines
+// and lines starting with # are ignored. Flags already set via the command
+// line take precedence and are not overwritten.
 package flagex
 
 import "flag"
@@ -24,18 +30,25 @@ var parseConfig = func(source string, data string) error {
     return nil
 }
 
+// ParseFile reads a configuration file at path and sets any flags defined in the
+// standard flag package that have not already been set on the command line.
 func ParseFile(path string) error {
     var data, err = os.ReadFile(path)
     if err != nil { return err }
     return parseConfig(path, string(data))
 }
 
+// ParseStream reads configuration from r and sets flags in the standard flag
+// package. Flags already set via the command line are not overwritten.
 func ParseStream(r io.Reader) error {
     var data, err = io.ReadAll(r)
     if err != nil { return err }
     return parseConfig("stream", string(data))
 }
 
+// ParseURL fetches configuration from url via HTTP GET and sets flags.
+// A non-200 status code returns an error. Flags already set on the command
+// line take precedence.
 func ParseURL(url string) error {
     var resp, err = http.Get(url)
     if err != nil { return err }
