@@ -1,4 +1,6 @@
 # flagex
+[![GoDoc](https://godoc.org/github.com/pin2t/flagex?status.svg)](https://godoc.org/github.com/pin2t/flagex) [![Go Report Card](https://goreportcard.com/badge/github.com/pin2t/flagex)](https://goreportcard.com/report/github.com/pin2t/flagex)
+
 
 Extended flag parsing for Go. Reads command-line flags from configuration files, streams, and URLs on top of the standard `flag` package.
 
