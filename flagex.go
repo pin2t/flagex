@@ -43,9 +43,7 @@ func (fs *flagSet) parseConfig(source string, data string) error {
 	fs.fs.Visit(func(f *flag.Flag) { set[f.Name] = true })
 	for i, line := range strings.Split(data, "\n") {
 		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
+		if line == "" || strings.HasPrefix(line, "#") { continue }
 		var name, value, found = strings.Cut(line, "=")
 		if !found {
 			return fmt.Errorf("%s:%d: expected name=value, got %q", source, i+1, line)
@@ -55,9 +53,7 @@ func (fs *flagSet) parseConfig(source string, data string) error {
 		if fs.fs.Lookup(name) == nil {
 			return fmt.Errorf("%s:%d: unknown option %q", source, i+1, name)
 		}
-		if set[name] {
-			continue
-		}
+		if set[name] { continue }
 		if err := fs.fs.Set(name, value); err != nil {
 			return fmt.Errorf("%s:%d: %v", source, i+1, err)
 		}
@@ -69,9 +65,7 @@ func (fs *flagSet) parseConfig(source string, data string) error {
 // FlagSet that have not already been set.
 func (fs *flagSet) ParseFile(path string) error {
 	var data, err = os.ReadFile(path)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	return fs.parseConfig(path, string(data))
 }
 
@@ -79,9 +73,7 @@ func (fs *flagSet) ParseFile(path string) error {
 // Flags already set take precedence and are not overwritten.
 func (fs *flagSet) ParseStream(r io.Reader) error {
 	var data, err = io.ReadAll(r)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	return fs.parseConfig("stream", string(data))
 }
 
@@ -90,18 +82,14 @@ func (fs *flagSet) ParseStream(r io.Reader) error {
 // precedence.
 func (fs *flagSet) ParseURL(url string) error {
 	var resp, err = http.Get(url)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("%s: %s", url, resp.Status)
 	}
 	var data []byte
 	data, err = io.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	return fs.parseConfig(url, string(data))
 }
 
@@ -120,22 +108,16 @@ func (fs *flagSet) ParseEnv(prefix string) error {
 	fs.fs.Visit(func(f *flag.Flag) { set[f.Name] = true })
 	for _, kv := range os.Environ() {
 		var name, value, found = strings.Cut(kv, "=")
-		if !found {
-			continue
-		}
+		if !found { continue }
 		name = strings.TrimSpace(name)
 		value = strings.TrimSpace(value)
 		var flagName string
 		if prefix == "" {
 			flagName = strings.ToLower(name)
 		} else {
-			if !strings.HasPrefix(name, prefix) {
-				continue
-			}
+			if !strings.HasPrefix(name, prefix) { continue }
 			flagName = strings.ToLower(strings.TrimPrefix(name, prefix))
-			if flagName == "" {
-				continue
-			}
+			if flagName == "" { continue }
 		}
 		if fs.fs.Lookup(flagName) == nil {
 			if prefix != "" {
@@ -143,9 +125,7 @@ func (fs *flagSet) ParseEnv(prefix string) error {
 			}
 			continue
 		}
-		if set[flagName] {
-			continue
-		}
+		if set[flagName] { continue }
 		if err := fs.fs.Set(flagName, value); err != nil {
 			return fmt.Errorf("env %s: %v", name, err)
 		}

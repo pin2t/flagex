@@ -71,19 +71,14 @@ import "flag"
 import "github.com/pin2t/flagex"
 
 func main() {
-    fs := flag.NewFlagSet("myapp", flag.ExitOnError)
-    user := fs.String("user", "", "user name")
-    port := fs.Int("port", 8080, "port number")
-
+    var fs = flag.NewFlagSet("myapp", flag.ExitOnError)
+    var user = fs.String("user", "", "user name")
+    var port = fs.Int("port", 8080, "port number")
     flagex.FlagSet(fs).ParseFile("app.conf")
     flagex.FlagSet(fs).ParseEnv("APP_")
-
-    // Flags from file and env are set; command-line values take precedence.
     fmt.Println(*user, *port)
 }
 ```
-
-All four configuration sources are available as methods on the wrapper:
 
 - **FlagSet(fs).ParseFile(path)** — reads configuration from a file.
 - **FlagSet(fs).ParseStream(r)** — reads configuration from an `io.Reader`.
