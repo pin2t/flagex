@@ -58,3 +58,37 @@ export APP_RATIO=1.5
 - **ParseStream(r)** — reads configuration from an `io.Reader`.
 - **ParseURL(url)** — fetches configuration via HTTP GET.
 - **ParseEnv(prefix)** — fetches configuration from system environment variables.
+
+## FlagSet API
+
+The `FlagSet` function wraps a `flag.FlagSet` so you can parse configuration into
+a non-default FlagSet (e.g., one created with `flag.NewFlagSet`).
+
+```go
+package main
+
+import "flag"
+import "github.com/pin2t/flagex"
+
+func main() {
+    fs := flag.NewFlagSet("myapp", flag.ExitOnError)
+    user := fs.String("user", "", "user name")
+    port := fs.Int("port", 8080, "port number")
+
+    flagex.FlagSet(fs).ParseFile("app.conf")
+    flagex.FlagSet(fs).ParseEnv("APP_")
+
+    // Flags from file and env are set; command-line values take precedence.
+    fmt.Println(*user, *port)
+}
+```
+
+All four configuration sources are available as methods on the wrapper:
+
+- **FlagSet(fs).ParseFile(path)** — reads configuration from a file.
+- **FlagSet(fs).ParseStream(r)** — reads configuration from an `io.Reader`.
+- **FlagSet(fs).ParseURL(url)** — fetches configuration via HTTP GET.
+- **FlagSet(fs).ParseEnv(prefix)** — reads configuration from environment variables.
+
+The package-level `ParseFile`, `ParseStream`, `ParseURL`, and `ParseEnv` functions
+are equivalent to calling the methods on `FlagSet(flag.CommandLine)`.
