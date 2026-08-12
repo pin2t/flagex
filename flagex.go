@@ -26,7 +26,7 @@ type flagSet struct {
 // configuration for a specific flag.FlagSet instead of the default
 // command-line FlagSet.
 //
-//	fs := flag.NewFlagSet("myapp", flag.ExitOnError)
+//	var fs:= flag.NewFlagSet("myapp", flag.ExitOnError)
 //	flagex.FlagSet(fs).ParseFile("app.conf")
 func FlagSet(fs *flag.FlagSet) *flagSet {
 	return &flagSet{fs: fs}
