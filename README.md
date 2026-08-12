@@ -2,7 +2,7 @@
 [![GoDoc](https://godoc.org/github.com/pin2t/flagex?status.svg)](https://godoc.org/github.com/pin2t/flagex)
 
 
-Extended flag parsing for Go. Reads command-line flags from configuration files, streams, and URLs on top of the standard `flag` package.
+Extended flag parsing for Go. Reads command-line flags from configuration files, streams, and URLs on top of the standard `flag` package. This library does not try to reinvent flags. It just extends (not replaces)  already existing flag package in standard library.
 
 ## Usage
 
@@ -12,12 +12,20 @@ package main
 import "flag"
 import "github.com/pin2t/flagex"
 
-var user = flag.String("user", "", "user name")
-var port = flag.Int("port", 8080, "port number")
+var user    = flag.String("user", "", "user name")
+var port    = flag.Int("port", 8080, "port number")
+var url     = flag.String("url", "http://localhost", "URL")
+var listen  = flag.String("listen", ":8080", "listen address")
+var count   = flag.Int("count", 0, "count value")
+var verbose = flag.Bool("verbose", false, "verbose mode")
+var ratio   = flag.Float64("ratio", 1.0, "ratio value")
+var conf    = flag.String("conf", "", "configuration file")
 
 func main() {
     flag.Parse()
-    flagex.ParseFile("app.conf")
+    if *conf != "" {
+        flagex.ParseFile(*conf)
+    }
     flagex.ParseURL("http://config-server/app.conf")
 }
 ```
