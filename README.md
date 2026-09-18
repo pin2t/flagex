@@ -1,5 +1,5 @@
 # flagex
-[![test](https://github.com/pin2t/flagex/actions/workflows/test.yml/badge.svg)](https://github.com/pin2t/flagex/actions/workflows/test.yml)[![GoDoc](https://godoc.org/github.com/pin2t/flagex?status.svg)](https://godoc.org/github.com/pin2t/flagex)
+[![test](https://github.com/pin2t/flagex/actions/workflows/test.yml/badge.svg)](https://github.com/pin2t/flagex/actions/workflows/test.yml) [![GoDoc](https://godoc.org/github.com/pin2t/flagex?status.svg)](https://godoc.org/github.com/pin2t/flagex)
 
 
 Extended flag parsing for Go. Reads command-line flags from configuration files, streams, and URLs on top of the standard `flag` package. This library does not try to reinvent flags. It just extends (not replaces)  already existing flag package in standard library.
